@@ -165,19 +165,13 @@
 					}
 				});
 
-				
 				if ( $('textarea').length > 0) {
-					
-					'!['+link+']('+link+' "'+link+'")'
-					
 					$('textarea').insertAtCaret('!['+linkTitle+']('+link+' "'+linkTitle+'")');
-					
 				}
-				
-					
 
 			});
 		},
+
 
 		/**
 		 * Delete entry management
@@ -185,12 +179,20 @@
 		deleteEntry: function(){
 			var view = this;
 
-			this.$view.on('click', this.settings["source_list"] + ' ' + this.settings["delete_selector"], function(){
+			this.$view.on('click', this.settings["source_list"] + ' ' + this.settings["delete_selector"], function(e){
 				var $parent = $(this).parents(view.settings["source_list"]);
 				var id = $parent.attr(view.settings["attribute"]);
 				var section = $parent.data('section');
-
 				sblp.current = view.$view.attr('id');
+					
+				var imageThumb = $('div[rel="'+id+'"] a.thumb.insert-link');
+				var link = imageThumb.attr('link');
+				var linkTitle = imageThumb.attr('title');
+				
+				var stringInTextarea = '!['+linkTitle+']('+link+' "'+linkTitle+'")';
+				var textAreaVal = $('textarea').val();
+				var newTextAreaVal = textAreaVal.replace(stringInTextarea, '');
+					
 				sblp.$white.show();
 
 				var ok = confirm('Are you sure you want to delete this entry? This entry will also be removed from other entries which are related. This action cannot be undone!');
@@ -202,15 +204,25 @@
 					data['items['+id+']'] = 'yes';
 
 					$.post(Symphony.Context.get('root')+'/symphony/publish/'+section+'/', data, function(){
-						sblp.restoreCurrentView();
+						$('textarea').val(newTextAreaVal);
+						imageThumb.hide();
+						$('.sblp-view').append('<div id="save-prompt" style="position:fixed;bottom:-1px;width:35%;border-radius:2px 2px 0 0;text-align:center;"><span style="display: block;margin-right: 30px;background-color: #87B75D;color: #FFF;border-radius: 4px 4px 0 0;padding: 3px;font-weight: 600;border: 1px solid #77A250;">Don\'t forget to save these changes &#9662;</span></div>');
+					
+					//	sblp.restoreCurrentView();
+						setTimeout(function() {
+							$('.sblp-view #save-prompt').fadeOut(100);
+						}, 4000);
+						sblp.$white.hide();
 					});
+					
 				}
 				else{
 					sblp.$white.hide();
 				}
 			});
 		}
+		
 
-	})
+	});
 
 })(jQuery);
